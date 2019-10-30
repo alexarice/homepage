@@ -1,17 +1,14 @@
-/*
- * CSS for org-mode document. Save with name style.css and include with
- * #+HTML_HEAD: <meta name="viewport" content="width=device-width, initial-scale = 1"><link rel="stylesheet" type="text/css" href="style.css" /><link href="https://fonts.googleapis.com/css?family=Source+Code+Pro&display=swap" rel="stylesheet">
- * It should be placed on the same directory as the HTML that is exported.
- *
- * Print options
- /*
- * Common format
- */
-
 #content {
     max-width: 500px;
     width: 85%;
     margin: auto;
+}
+
+.photo {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 25px;
 }
 
 html {
