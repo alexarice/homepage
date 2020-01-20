@@ -37,4 +37,12 @@ Haskell or Agda and am a user of Emacs and the Nixos Linux
 distribution.
 
 * Teaching
-- I am currently TAing "Advanced Functional Programming" (Autumn 2019)
+- I was a teaching assistant for "Advanced Functional Programming" (Autumn 2019)
+- I am a teaching assistant for "Logic and Computation" (Spring 2019)
+
+* Events
+I have attended the following events:
+- [[http://events.cs.bham.ac.uk/syco/2/][SYCO 2]]
+- [[http://events.cs.bham.ac.uk/syco/3/][SYCO 3]]
+- [[http://events.cs.bham.ac.uk/syco/6/][SYCO 6]]
+- MGS Christmas lectures in Sheffield 2019
