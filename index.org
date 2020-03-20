@@ -46,3 +46,5 @@ I have attended the following events:
 - [[http://events.cs.bham.ac.uk/syco/3/][SYCO 3]]
 - [[http://events.cs.bham.ac.uk/syco/6/][SYCO 6]]
 - MGS Christmas lectures in Sheffield 2019
+* Talks
+- 19th March 2020: Birmingham theory group lab lunch - [[file:talks/inverses.pdf][Coinductive invertibility in Higher Categories]]
