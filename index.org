@@ -48,3 +48,5 @@ I have attended the following events:
 - MGS Christmas lectures in Sheffield 2019
 * Talks
 - 19th March 2020: Birmingham theory group lab lunch - [[file:talks/inverses.pdf][Coinductive invertibility in Higher Categories]]
+* Posts
+- [[file:posts/strict-group-theory.lagda.org][Strictly Associative Group Theory]] - 26/03/2020
