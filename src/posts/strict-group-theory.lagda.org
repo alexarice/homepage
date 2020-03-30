@@ -8,11 +8,13 @@
 #+HTML: <div style="display: none;">
 #+begin_src agda2
 open import Algebra.Bundles using (Group)
-module _ {c ℓ} {𝓖 : Group c ℓ} where
+open import Level using (0ℓ)
+module _ {𝓖 : Group 0ℓ 0ℓ} where
 
-open Group 𝓖
+open Group 𝓖 renaming (refl to ≈-refl; setoid to G)
 
-open import Relation.Binary.Reasoning.Setoid setoid
+module _ where
+  open import Relation.Binary.Reasoning.Setoid G
 #+end_src
 #+HTML: </div>
 
@@ -21,14 +23,14 @@ open import Relation.Binary.Reasoning.Setoid setoid
 Commonly, when one starts to learn group theory, they are given the axioms for a group and then shown a very basic proof which very carefully uses these axioms. As an example, one might show that the identity of a group is unique:
 
 #+begin_src agda2
-identityˡ-unique : ∀ x y → x ∙ y ≈ y → x ≈ ε
-identityˡ-unique x y eq = begin
-  x              ≈˘⟨ identityʳ x ⟩
-  x ∙ ε          ≈˘⟨ ∙-congˡ (inverseʳ y) ⟩
-  x ∙ (y ∙ y ⁻¹) ≈˘⟨ assoc x y (y ⁻¹) ⟩
-  (x ∙ y) ∙ y ⁻¹ ≈⟨ ∙-congʳ eq ⟩
-       y  ∙ y ⁻¹ ≈⟨ inverseʳ y ⟩
-  ε              ∎
+  identityˡ-unique : ∀ x y → x ∙ y ≈ y → x ≈ ε
+  identityˡ-unique x y eq = begin
+    x              ≈˘⟨ identityʳ x ⟩
+    x ∙ ε          ≈˘⟨ ∙-congˡ (inverseʳ y) ⟩
+    x ∙ (y ∙ y ⁻¹) ≈˘⟨ assoc x y (y ⁻¹) ⟩
+    (x ∙ y) ∙ y ⁻¹ ≈⟨ ∙-congʳ eq ⟩
+         y  ∙ y ⁻¹ ≈⟨ inverseʳ y ⟩
+    ε              ∎
 #+end_src
 
 This works nicely for some small examples but as proofs get more complicated, a lot of the proof becomes moving brackets around and adding units, which can be considered boilerplate and obscures the interesting parts of the proof.
@@ -41,21 +43,39 @@ In this post, a method in which this "bracketless group theory" can be written i
 
 The key concept that will be used is that there are two different types of equality in Type Theory (which is the perspective taken for this post). The first type is propositional equality, which is written as ~≈~ above. ~A ≈ B~ effectively means that we can prove that ~A~ and ~B~ are equal. The second type of equality is definitional equality or judgmental equality. This is stronger than propositional equality and if two objects are definitionally equal it means that they are the same objects (or at least have the same normal form in the type theory).
 
-What we had above was a propositional equality between
-#+begin_src
-(x ∙ y) ∙ z
+What we had above was a propositional equality between ~(x ∙ y) ∙ z~ and ~x ∙ (y ∙ z)~
+#+begin_src agda2
+  gassoc : ∀ x y z → (x ∙ y) ∙ z ≈ x ∙ (y ∙ z)
+  gassoc x y z = assoc x y z
 #+end_src
-and
-#+begin_src
-x ∙ (y ∙ z)
-#+end_src
+
 when what we really want is for this to be a definitional equality, which would allow us to treat these as the same object. We say that we have /strict associativity/ exactly when this equation holds by definition. Luckily there is such a structure that has this property, namely function composition. Suppose we have functions ~f g h : X → X~. Then we have
-#+begin_src
-(f ∘ g) ∘ h = f ∘ (g ∘ h) = λ x → f (g (h x))
+#+html: <div style="display: none;">
+#+begin_src agda2
+module hidden where
+  open import Relation.Binary.PropositionalEquality
+  infixr 5 _∘_
+  _∘_ : ∀ {X : Set} (f g : X → X) → X → X
+  (f ∘ g) x = f (g x)
+  infixr 4 _≃_
+  _≃_ : ∀ {X Y : Set} (f g : X → Y) → Set
+  _≃_ {X} f g = (x : X) → f x ≡ g x
+#+end_src
+#+html: </div>
+#+begin_src agda2
+  sassoc : ∀ {X} (f g h : X → X) → (f ∘ g) ∘ h ≃ f ∘ (g ∘ h)
+  sassoc f g h = λ x → refl
 #+end_src
 Therefore we can work with functions without ever having to worry about associativity problems. We can also note that we also eliminate the need for any identity laws with functions as for all sets ~X~, we have an identity function ~id : X → X~ with
-#+begin_src
-f ∘ id = id ∘ f = f
+#+begin_src agda2
+  id : ∀ {X : Set} → X → X
+  id x = x
+
+  sidentityˡ : ∀ {X} (f : X → X) → id ∘ f ≃ f
+  sidentityˡ f = λ x → refl
+
+  sidentityʳ : ∀ {X} (f : X → X) → f ∘ id ≃ f
+  sidentityʳ f = λ x → refl
 #+end_src
 
 We say a structure has /strict units/ or is /strictly unital/ when this property holds.
@@ -85,30 +105,38 @@ We say a structure has /strict units/ or is /strictly unital/ when this property
 
 * Implementation
   All the ideas above have been implemented in [[https://github.com/alexarice/Groups][https://github.com/alexarice/Groups]]. The corresponding version of the proof in the introduction is:
-
-  #+begin_src
+#+html:<div style="display: none;">
+#+begin_src agda2
+module _ where
+  open import Algebra.Group.Symmetric 𝓖 renaming (e to id)
+  open import Algebra.Group.Symmetric.Equality 𝓖
+  open import Algebra.Group.Reasoning 𝓖
+  open import Algebra.Group.Properties SymGroup using (invʳ; invˡ)
+#+end_src
+#+html:</div>
+#+begin_src agda2
   identity-is-unique-strong : ∀ a b → a ∙ b ≈ b → a ≈ ε
   identity-is-unique-strong a b p = begin⟨ ⟦⟧ ⟩
-  ⟦ a ⟧                       ∘⟨⟩≣˘⟨ invʳ ⟦ b ⟧ ⟩
-  ⟨ ⟦ a ⟧ ∘ ⟦ b ⟧ ⟩∘ inv ⟦ b ⟧   ≣⟨ ⟨ ⟦⟧ ⟩⦅ p ⦆ ⟩
-  ⟨ ⟦ b ⟧ ∘ inv ⟦ b ⟧           ⟩≣⟨ invʳ ⟦ b ⟧ ⟩
-  id                              ∎
-  #+end_src
+    ⟦ a ⟧                       ∘⟨⟩≣˘⟨ invʳ ⟦ b ⟧ ⟩
+    ⟨ ⟦ a ⟧ ∘ ⟦ b ⟧ ⟩∘ inv ⟦ b ⟧   ≣⟨ ⟨ ⟦⟧ ⟩⦅ p ⦆ ⟩
+    ⟨ ⟦ b ⟧ ∘ inv ⟦ b ⟧           ⟩≣⟨ invʳ ⟦ b ⟧ ⟩
+    id                              ∎
+#+end_src
 
   As a second example, here is the proof of left cancellation:
 
-  #+begin_src
+#+begin_src agda2
   left-cancellation : ∀ g h x → x ∙ g ≈ x ∙ h → g ≈ h
   left-cancellation g h x p = begin⟨ ⟦⟧ ⟩
     ⟨⟩∘ ⟦ g ⟧ ≣˘⟨ invˡ ⟦ x ⟧ ⟩
     inv ⟦ x ⟧ ∘⟨ ⟦ x ⟧ ∘ ⟦ g ⟧ ⟩≣⟨ ⟨ ⟦⟧ ⟩⦅ p ⦆ ⟩
     ⟨ inv ⟦ x ⟧ ∘ ⟦ x ⟧ ⟩∘ ⟦ h ⟧ ≣⟨ invˡ ⟦ x ⟧ ⟩
     ⟦ h ⟧ ∎
-  #+end_src
+#+end_src
 
   and that the inverse operation is an anti homomorphism on the group operation:
 
-  #+begin_src
+#+begin_src agda2
   inv-of-composite : ∀ g h → (g ∙ h) ⁻¹ ≈ h ⁻¹ ∙ g ⁻¹
   inv-of-composite g h = begin⟨ ⟦⟧ ⟩
     inv (⟦ g ⟧ ∘ ⟦ h ⟧) ∘⟨⟩≣˘⟨ invʳ ⟦ g ⟧ ⟩
@@ -116,7 +144,7 @@ We say a structure has /strict units/ or is /strictly unital/ when this property
     ⟨ inv (⟦ g ⟧ ∘ ⟦ h ⟧) ∘ (⟦ g ⟧ ∘ ⟦ h ⟧) ⟩∘ inv ⟦ h ⟧ ∘ inv ⟦ g ⟧
       ≣⟨ invˡ (⟦ g ⟧ ∘ ⟦ h ⟧) ⟩
     inv ⟦ h ⟧ ∘ inv ⟦ g ⟧ ∎
-  #+end_src
+#+end_src
 
   The rest of the post will be explaining the code above.
 
@@ -149,33 +177,51 @@ We can also see that unitality has been taken care of. In the first line it has 
 
    This would lead us to the following definition of equality between invertible functions.
 
-#+begin_src
-_∼_ : Sym → Sym → Set
-f ∼ g = to f ≃ to g
+#+html:<div style="display: none;">
+#+begin_src agda2
+module hidden2 where
+  open import Algebra.Group.Symmetric 𝓖 renaming (e to id)
+  open import Function.Equality using (_⇨_;Π;_⟶_) renaming (_∘_ to _*_)
+  open import Function.Inverse using (Inverse)
+  open import Level
+  open import Relation.Binary using (Setoid; _⇒_)
+
+  open Π
+  open Inverse
+
+  funcSetoid : Setoid _ _
+  funcSetoid = G ⇨ G
+  open module F = Setoid funcSetoid using () renaming (_≈_ to _≃_)
+#+end_src
+#+html:</div>
+
+#+begin_src agda2
+  _∼_ : Sym → Sym → Set
+  f ∼ g = to f ≃ to g
 #+end_src
 
 Where Sym is the type of permutations on the group and ~≃~ is pointwise equality of functions.
 
  This has the advantage that it does not remember any of the invertibility data and so we can have all the nice features mentioned above. However, it turns out that this forgets too much invertibility data, in that if the implementation is made with this equality, then Agda will complain everywhere about implicit arguments that it cannot resolve. The next thing we might try is to remember the invertibility data but do not check whether it is equal. This leads to the following definition.
 
-#+begin_src
-record SymEq (f g : Sym) : Set where
-  field
-    eq : to f ≃ to g
+#+begin_src agda2
+  record SymEq (f g : Sym) : Set where
+    field
+      eq : to f ≃ to g
 
-_≣_ : Sym → Sym → Set
-_≣_ = SymEq
+  _≣_ : Sym → Sym → Set
+  _≣_ = SymEq
 #+end_src
 
 This ends up being a nice form of equality which we use to define the symmetric group. Unfortunately, it runs into problems with invertibility data not lining up if we try to use it in the syntax above. It turns out we need another type of equality, where we only remember the invertibility data for the second argument. This clears all the implicit argument problems without introducing any associativity problems.
 
-#+begin_src
-record PartSymEq (f : G ⟶ G) (g : Sym) : Set where
-  field
-    peq : f ≃ to g
+#+begin_src agda2
+  record PartSymEq (f : G ⟶ G) (g : Sym) : Set where
+    field
+      peq : f ≃ to g
 
-_≣'_ : Sym → Sym → Set
-f ≣' g = PartSymEq (to f) g
+  _≣'_ : Sym → Sym → Set
+  f ≣' g = PartSymEq (to f) g
 #+end_src
 
 ** Dealing with homomorphisms
@@ -206,22 +252,31 @@ If were naively transport this using the inclusion we would get:
 when what we really wanted was:
 
 #+begin_src
-⟦ a ⟧ ∘ ⟦ b ⟧ ≣ ⟦ b ⟧
+  ⟦ a ⟧ ∘ ⟦ b ⟧ ≣ ⟦ b ⟧
 #+end_src
 
 The proofs that these imply each other are not too difficult but applying them to each case is tedious and makes the proofs more convoluted which defeats the original purpose of this construction. Therefore two reflection helpers have been made to automate this process. The first is ~⟨_⟩⦅_⦆~, which solves the second problem. This takes a homomorphism and an equality and applies as many homomorphism rules as possible to the equality. It does this by inspecting the terms of the left and right hand side using reflection and using this to work out which rules to apply.
 
-#+begin_src
-test : ∀ a b → a ≈ b → ⟦ a ⟧ ≣ ⟦ b ⟧
-test a b p = ⟨ ⟦⟧ ⟩⦅ p ⦆
+#+html:<div style="display: none;">
+#+begin_src agda2
+module _ where
+  open import Algebra.Group.Symmetric 𝓖 renaming (e to id)
+  open import Algebra.Group.Symmetric.Equality 𝓖
+  open import Algebra.Group.Reasoning 𝓖
+#+end_src
+#+html:</div>
 
-test2 : ∀ a b → a ∙ b ≈ b → ⟦ a ⟧ ∘ ⟦ b ⟧ ≣ ⟦ b ⟧
-test2 a b p = ⟨ ⟦⟧ ⟩⦅ p ⦆
+#+begin_src agda2
+  test : ∀ a b → a ≈ b → ⟦ a ⟧ ≣ ⟦ b ⟧
+  test a b p = ⟨ ⟦⟧ ⟩⦅ p ⦆
 
-test3 : ∀ x y z
-      → x ∙ (y ⁻¹ ∙ ε) ≈ z ∙ z
-      → ⟦ x ⟧ ∘ (inv ⟦ y ⟧ ∘ e) ≣ ⟦ z ⟧ ∘ ⟦ z ⟧
-test3 x y z p = ⟨ ⟦⟧ ⟩⦅ p ⦆
+  test2 : ∀ a b → a ∙ b ≈ b → ⟦ a ⟧ ∘ ⟦ b ⟧ ≣ ⟦ b ⟧
+  test2 a b p = ⟨ ⟦⟧ ⟩⦅ p ⦆
+
+  test3 : ∀ x y z
+        → x ∙ (y ⁻¹ ∙ ε) ≈ z ∙ z
+        → ⟦ x ⟧ ∘ (inv ⟦ y ⟧ ∘ id) ≣ ⟦ z ⟧ ∘ ⟦ z ⟧
+  test3 x y z p = ⟨ ⟦⟧ ⟩⦅ p ⦆
 #+end_src
 
 The second reflection helper is wrapped in the ~begin⟨_⟩_~ function. This takes care of the first problem we had, again by using reflection to find the term needed and applying the appropriate rules to get the given proof in the form needed.
