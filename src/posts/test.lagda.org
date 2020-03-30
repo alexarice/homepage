@@ -1,7 +1,7 @@
-Test of htmlize
+  Test of htmlize
 
 #+begin_src agda2
-module posts.test where
+module _ where
 data ⊤ : Set where
   tt : ⊤
 #+end_src
