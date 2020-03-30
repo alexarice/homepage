@@ -7,7 +7,7 @@
 [[./rice.jpg]]
 
 I have just started my PhD at the University of Birmingham. I am
-working under the supervision of [[http://www.cs.bham.ac.uk/~vicaryjo/][Jamie Vicary]] and [[http://www.cs.bham.ac.uk/~mhe/][Martin Escardo]].
+working under the supervision of [[http://www.cs.bham.ac.uk/~vicaryjo/][Jamie Vicary]] and [[http://www.cs.bham.ac.uk/~mhe/][Martín Escardó]].
 
 * Contact
 

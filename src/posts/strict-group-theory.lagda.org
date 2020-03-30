@@ -1,4 +1,4 @@
-#+TITLE: Strictly Associative Group Theory
+#+TITLE: Strictly Associative Group Theory in Agda
 
 #+HTML_HEAD_EXTRA: <meta name="viewport" content="width=device-width, initial-scale=1">
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="../css/style.css" />
@@ -288,4 +288,4 @@ There are currently a few limitations with this system:
 - Agda is not great at telling you what should go in a hole with this syntax. Where the reflection helpers are used, it will tell you it wants something of a type labelled by some mysterious number. Even when this isn't the case, the use of records for the permutations sometimes causes a mess when one tries to solve a hole.
 
 * Thanks
-Thanks goes to Martin Escardo, who suggested the possibility of using Cayley's Theorem and convinced me to write this post.
+Thanks goes to Martín Escardó, who suggested the possibility of using Cayley's Theorem and convinced me to write this post. I would also like to thank all members of the Birmingham theory group who I have discussed this work with.
